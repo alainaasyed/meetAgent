@@ -148,6 +148,40 @@
         .badge { display: inline-block; background: #0078d4; color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
         .toast { position: fixed; bottom: 24px; right: 24px; background: #00a86b; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .footer { text-align: center; padding: 24px; color: #888; font-size: 13px; }
+        .timeline { position: relative; padding: 10px 0; }
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: white;
+    border: 1px solid #e0e0e0;
+}
+.timeline-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.timeline-dot.green { background: #00a86b; }
+.timeline-dot.yellow { background: #ffa500; }
+.timeline-dot.red { background: #ff4444; }
+.timeline-dot.grey { background: #999; }
+.timeline-info { flex: 1; }
+.timeline-person { font-weight: 600; color: #333; font-size: 14px; }
+.timeline-task { color: #666; font-size: 13px; margin-top: 2px; }
+.timeline-deadline {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+.deadline-green { background: #f0fff4; color: #00a86b; }
+.deadline-yellow { background: #fff8e0; color: #cc8800; }
+.deadline-red { background: #fff0f0; color: #ff4444; }
+.deadline-grey { background: #f5f5f5; color: #999; }
     </style>
 </head>
 <body>
@@ -225,7 +259,10 @@ Team meeting next Monday at 10am."></textarea>
             </div>
         </div>
     </div>
-
+    <div class="card" id="deadlineCard" style="display:none;">
+    <h3>📅 Deadline Tracker</h3>
+    <div id="deadlineTracker"></div>
+    </div>
     <div class="footer">Built with ❤️ for Microsoft Agents League Hackathon 2026</div>
     <div class="toast" id="toast"></div>
 
@@ -252,16 +289,13 @@ Team meeting next Monday at 10am."></textarea>
                 const data = await response.json();
                 meetingData = data;
 
-                // Summary
                 document.getElementById('summaryText').textContent = data.summary || 'Meeting analyzed successfully.';
 
-                // Stats
                 document.getElementById('statActions').textContent = data.action_items.length;
                 document.getElementById('statDecisions').textContent = data.decisions.length;
                 document.getElementById('statUnresolved').textContent = data.unresolved.length;
                 document.getElementById('statEmails').textContent = data.emails.length;
 
-                // Action Items
                 const actionDiv = document.getElementById('actionItems');
                 actionDiv.innerHTML = '';
                 document.getElementById('actionCount').textContent = data.action_items.length;
@@ -274,7 +308,6 @@ Team meeting next Monday at 10am."></textarea>
                         </div>`;
                 });
 
-                // Decisions
                 const decisionsDiv = document.getElementById('decisions');
                 decisionsDiv.innerHTML = '';
                 document.getElementById('decisionCount').textContent = data.decisions.length;
@@ -282,7 +315,6 @@ Team meeting next Monday at 10am."></textarea>
                     decisionsDiv.innerHTML += `<div class="decision-item">✓ ${d}</div>`;
                 });
 
-                // Unresolved
                 const unresolvedDiv = document.getElementById('unresolved');
                 unresolvedDiv.innerHTML = '';
                 document.getElementById('unresolvedCount').textContent = data.unresolved.length;
@@ -290,7 +322,6 @@ Team meeting next Monday at 10am."></textarea>
                     unresolvedDiv.innerHTML += `<div class="unresolved-item">⚠ ${u}</div>`;
                 });
 
-                // Emails
                 const emailsDiv = document.getElementById('emails');
                 emailsDiv.innerHTML = '';
                 data.emails.forEach((email, index) => {
@@ -312,6 +343,7 @@ Team meeting next Monday at 10am."></textarea>
                         </div>`;
                 });
 
+                buildDeadlineTracker(data.action_items);
                 document.getElementById('results').style.display = 'block';
                 document.getElementById('exportBtn').style.display = 'block';
 
@@ -400,6 +432,90 @@ Team meeting next Monday at 10am."></textarea>
             navigator.clipboard.writeText(text);
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
+        function buildDeadlineTracker(actionItems) {
+            const trackerDiv = document.getElementById('deadlineTracker');
+            const card = document.getElementById('deadlineCard');
+            trackerDiv.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const days = {
+                'monday':1,'tuesday':2,'wednesday':3,'thursday':4,
+                'friday':5,'saturday':6,'sunday':0
+            };
+
+            function parseDeadline(deadlineStr) {
+                if (!deadlineStr) return null;
+                const str = deadlineStr.toLowerCase().trim();
+
+                for (const [day, dayNum] of Object.entries(days)) {
+                    if (str.includes(day)) {
+                        const date = new Date(today);
+                        const currentDay = date.getDay();
+                        let diff = dayNum - currentDay;
+                        if (diff <= 0) diff += 7;
+                        date.setDate(date.getDate() + diff);
+                        return date;
+                    }
+                }
+
+                const parsed = new Date(deadlineStr);
+                if (!isNaN(parsed)) return parsed;
+                return null;
+            }
+
+            let hasDeadlines = false;
+
+            actionItems.forEach(item => {
+                if (!item.deadline) return;
+                hasDeadlines = true;
+
+                const deadlineDate = parseDeadline(item.deadline);
+                let colorClass = 'grey';
+                let deadlineClass = 'deadline-grey';
+                let deadlineLabel = item.deadline;
+
+                if (deadlineDate) {
+                    const diffDays = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays < 0) {
+                        colorClass = 'red';
+                        deadlineClass = 'deadline-red';
+                        deadlineLabel = `⚠ Overdue (${item.deadline})`;
+                    } else if (diffDays === 0) {
+                        colorClass = 'red';
+                        deadlineClass = 'deadline-red';
+                        deadlineLabel = `🔴 Due Today!`;
+                    } else if (diffDays <= 3) {
+                        colorClass = 'yellow';
+                        deadlineClass = 'deadline-yellow';
+                        deadlineLabel = `🟡 ${diffDays} day${diffDays > 1 ? 's' : ''} left (${item.deadline})`;
+                    } else {
+                        colorClass = 'green';
+                        deadlineClass = 'deadline-green';
+                        deadlineLabel = `🟢 ${diffDays} days left (${item.deadline})`;
+                    }
+                }
+
+                trackerDiv.innerHTML += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot ${colorClass}"></div>
+                        <div class="timeline-info">
+                            <div class="timeline-person">👤 ${item.person}</div>
+                            <div class="timeline-task">${item.task}</div>
+                        </div>
+                        <div class="timeline-deadline ${deadlineClass}">${deadlineLabel}</div>
+                    </div>`;
+            });
+
+            if (!hasDeadlines) {
+                trackerDiv.innerHTML = '<p style="color:#888;font-size:14px;">No deadlines found in meeting notes.</p>';
+            }
+
+            card.style.display = 'block';
         }
 
         function showToast(message) {
