@@ -6,20 +6,13 @@
     <title>MeetAgent - AI Meeting Assistant</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
         .header {
             background: linear-gradient(135deg, #0078d4, #004e8c);
             color: white;
             padding: 20px 40px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
-        .header h1 { font-size: 24px; }
+        .header h1 { font-size: 26px; margin-bottom: 4px; }
         .header p { font-size: 14px; opacity: 0.8; }
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         .input-section {
@@ -30,6 +23,16 @@
             margin-bottom: 24px;
         }
         .input-section h2 { color: #0078d4; margin-bottom: 12px; font-size: 18px; }
+        .meeting-title {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        .meeting-title:focus { outline: none; border-color: #0078d4; }
         textarea {
             width: 100%;
             height: 180px;
@@ -39,7 +42,6 @@
             font-size: 14px;
             resize: vertical;
             font-family: inherit;
-            transition: border 0.3s;
         }
         textarea:focus { outline: none; border-color: #0078d4; }
         .analyze-btn {
@@ -55,14 +57,17 @@
         }
         .analyze-btn:hover { background: #004e8c; }
         .analyze-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #0078d4;
-            font-size: 16px;
-        }
+        .loading { display: none; text-align: center; padding: 20px; color: #0078d4; font-size: 16px; }
         .results { display: none; }
+        .summary-card {
+            background: linear-gradient(135deg, #0078d4, #004e8c);
+            color: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+        .summary-card h3 { font-size: 16px; margin-bottom: 8px; opacity: 0.9; }
+        .summary-card p { font-size: 15px; line-height: 1.6; }
         .card {
             background: white;
             border-radius: 12px;
@@ -70,14 +75,7 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             margin-bottom: 20px;
         }
-        .card h3 {
-            color: #0078d4;
-            margin-bottom: 16px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .card h3 { color: #0078d4; margin-bottom: 16px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
         .action-item {
             background: #f0f7ff;
             border-left: 4px solid #0078d4;
@@ -85,44 +83,24 @@
             border-radius: 0 8px 8px 0;
             margin-bottom: 10px;
         }
-        .action-item .person {
-            font-weight: 600;
-            color: #0078d4;
-            font-size: 14px;
-        }
+        .action-item .person { font-weight: 600; color: #0078d4; font-size: 14px; }
         .action-item .task { color: #333; font-size: 14px; margin-top: 4px; }
         .action-item .deadline { color: #888; font-size: 12px; margin-top: 4px; }
-        .decision-item, .unresolved-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        .decision-item { background: #f0fff4; border-left: 4px solid #00a86b; color: #333; }
-        .unresolved-item { background: #fff8f0; border-left: 4px solid #ff8c00; color: #333; }
-        .email-card {
+        .decision-item { background: #f0fff4; border-left: 4px solid #00a86b; padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14px; color: #333; }
+        .unresolved-item { background: #fff8f0; border-left: 4px solid #ff8c00; padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14px; color: #333; }
+        .email-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+        .email-header { background: #f5f5f5; padding: 10px 16px; font-weight: 600; color: #333; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .email-subject { font-size: 12px; color: #666; padding: 8px 16px; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
+        .email-input { padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; align-items: center; }
+        .email-input input {
+            flex: 1;
+            padding: 6px 10px;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            overflow: hidden;
+            border-radius: 4px;
+            font-size: 13px;
         }
-        .email-header {
-            background: #f5f5f5;
-            padding: 10px 16px;
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .email-body {
-            padding: 16px;
-            font-size: 14px;
-            color: #444;
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
+        .email-body { padding: 16px; font-size: 14px; color: #444; white-space: pre-wrap; line-height: 1.6; }
+        .btn-group { display: flex; gap: 8px; }
         .copy-btn {
             background: #0078d4;
             color: white;
@@ -132,29 +110,43 @@
             font-size: 12px;
             cursor: pointer;
         }
-        .copy-btn:hover { background: #004e8c; }
-        .badge {
-            display: inline-block;
-            background: #0078d4;
+        .send-btn {
+            background: #00a86b;
             color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-left: 8px;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .send-btn:hover { background: #007a4d; }
+        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .badge { display: inline-block; background: #0078d4; color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #00a86b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div>
-            <h1>🤝 MeetAgent</h1>
-            <p>AI-powered meeting notes analyzer — paste notes, get instant action items & emails</p>
-        </div>
+        <h1>🤝 MeetAgent</h1>
+        <p>AI-powered meeting notes analyzer — paste notes, get instant action items & auto-send emails</p>
     </div>
 
     <div class="container">
         <div class="input-section">
             <h2>📋 Paste Your Meeting Notes</h2>
+            <input type="text" class="meeting-title" id="meetingTitle" placeholder="Meeting Title (e.g. Weekly Sprint Planning)">
             <textarea id="meetingNotes" placeholder="Paste your rough meeting notes here...
 
 Example:
@@ -164,16 +156,17 @@ We decided to use React for frontend.
 Budget approval is still pending from manager.
 Team meeting next Monday at 10am."></textarea>
             <br>
-            <button class="analyze-btn" onclick="analyzeMeeting()">
-                ⚡ Analyze Meeting
-            </button>
+            <button class="analyze-btn" onclick="analyzeMeeting()">⚡ Analyze Meeting</button>
         </div>
 
-        <div class="loading" id="loading">
-            🤖 MeetAgent is analyzing your notes...
-        </div>
+        <div class="loading" id="loading">🤖 MeetAgent is analyzing your notes...</div>
 
         <div class="results" id="results">
+            <div class="summary-card">
+                <h3>📊 Meeting Summary</h3>
+                <p id="summaryText"></p>
+            </div>
+
             <div class="card">
                 <h3>✅ Action Items <span class="badge" id="actionCount">0</span></h3>
                 <div id="actionItems"></div>
@@ -196,9 +189,12 @@ Team meeting next Monday at 10am."></textarea>
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
         async function analyzeMeeting() {
             const notes = document.getElementById('meetingNotes').value.trim();
+            const title = document.getElementById('meetingTitle').value.trim() || 'Team Meeting';
             if (!notes) { alert('Please paste your meeting notes first!'); return; }
 
             document.querySelector('.analyze-btn').disabled = true;
@@ -209,10 +205,13 @@ Team meeting next Monday at 10am."></textarea>
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ notes })
+                    body: JSON.stringify({ notes, title })
                 });
 
                 const data = await response.json();
+
+                // Summary
+                document.getElementById('summaryText').textContent = data.summary || 'Meeting analyzed successfully.';
 
                 // Action Items
                 const actionDiv = document.getElementById('actionItems');
@@ -246,12 +245,20 @@ Team meeting next Monday at 10am."></textarea>
                 // Emails
                 const emailsDiv = document.getElementById('emails');
                 emailsDiv.innerHTML = '';
-                data.emails.forEach(email => {
+                data.emails.forEach((email, index) => {
                     emailsDiv.innerHTML += `
                         <div class="email-card">
                             <div class="email-header">
                                 📧 Email to ${email.person}
-                                <button class="copy-btn" onclick="copyEmail(this, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Copy</button>
+                                <div class="btn-group">
+                                    <button class="copy-btn" onclick="copyEmail(this, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Copy</button>
+                                    <button class="send-btn" id="sendBtn${index}" onclick="sendEmail(${index}, '${email.subject}', \`${email.email_draft.replace(/`/g, '\\`')}\`)">Send Email</button>
+                                </div>
+                            </div>
+                            <div class="email-subject">Subject: ${email.subject}</div>
+                            <div class="email-input">
+                                <span style="font-size:13px;color:#666">To:</span>
+                                <input type="email" id="emailTo${index}" placeholder="Enter recipient email address" />
                             </div>
                             <div class="email-body">${email.email_draft}</div>
                         </div>`;
@@ -268,10 +275,55 @@ Team meeting next Monday at 10am."></textarea>
             }
         }
 
+        async function sendEmail(index, subject, body) {
+            const emailInput = document.getElementById(`emailTo${index}`);
+            const recipient = emailInput.value.trim();
+
+            if (!recipient) {
+                alert('Please enter recipient email address!');
+                return;
+            }
+
+            const sendBtn = document.getElementById(`sendBtn${index}`);
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/send_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: recipient, subject, body })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    sendBtn.textContent = '✓ Sent!';
+                    sendBtn.style.background = '#00a86b';
+                    showToast(`Email sent to ${recipient}!`);
+                } else {
+                    alert('Failed to send: ' + data.error);
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send Email';
+                }
+            } catch (error) {
+                alert('Something went wrong!');
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Email';
+            }
+        }
+
         function copyEmail(btn, text) {
             navigator.clipboard.writeText(text);
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
     </script>
 </body>
