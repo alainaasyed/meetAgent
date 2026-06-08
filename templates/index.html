@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetAgent - AI Meeting Assistant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #0078d4, #004e8c);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 { font-size: 24px; }
+        .header p { font-size: 14px; opacity: 0.8; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .input-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .input-section h2 { color: #0078d4; margin-bottom: 12px; font-size: 18px; }
+        textarea {
+            width: 100%;
+            height: 180px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+            transition: border 0.3s;
+        }
+        textarea:focus { outline: none; border-color: #0078d4; }
+        .analyze-btn {
+            margin-top: 12px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .analyze-btn:hover { background: #004e8c; }
+        .analyze-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #0078d4;
+            font-size: 16px;
+        }
+        .results { display: none; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            color: #0078d4;
+            margin-bottom: 16px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-item {
+            background: #f0f7ff;
+            border-left: 4px solid #0078d4;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 10px;
+        }
+        .action-item .person {
+            font-weight: 600;
+            color: #0078d4;
+            font-size: 14px;
+        }
+        .action-item .task { color: #333; font-size: 14px; margin-top: 4px; }
+        .action-item .deadline { color: #888; font-size: 12px; margin-top: 4px; }
+        .decision-item, .unresolved-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .decision-item { background: #f0fff4; border-left: 4px solid #00a86b; color: #333; }
+        .unresolved-item { background: #fff8f0; border-left: 4px solid #ff8c00; color: #333; }
+        .email-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .email-header {
+            background: #f5f5f5;
+            padding: 10px 16px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .email-body {
+            padding: 16px;
+            font-size: 14px;
+            color: #444;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .copy-btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .copy-btn:hover { background: #004e8c; }
+        .badge {
+            display: inline-block;
+            background: #0078d4;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🤝 MeetAgent</h1>
+            <p>AI-powered meeting notes analyzer — paste notes, get instant action items & emails</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="input-section">
+            <h2>📋 Paste Your Meeting Notes</h2>
+            <textarea id="meetingNotes" placeholder="Paste your rough meeting notes here...
+
+Example:
+John will finish the login page by Friday.
+Sarah needs to fix the API bug.
+We decided to use React for frontend.
+Budget approval is still pending from manager.
+Team meeting next Monday at 10am."></textarea>
+            <br>
+            <button class="analyze-btn" onclick="analyzeMeeting()">
+                ⚡ Analyze Meeting
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            🤖 MeetAgent is analyzing your notes...
+        </div>
+
+        <div class="results" id="results">
+            <div class="card">
+                <h3>✅ Action Items <span class="badge" id="actionCount">0</span></h3>
+                <div id="actionItems"></div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Decisions Made <span class="badge" id="decisionCount">0</span></h3>
+                <div id="decisions"></div>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ Unresolved Issues <span class="badge" id="unresolvedCount">0</span></h3>
+                <div id="unresolved"></div>
+            </div>
+
+            <div class="card">
+                <h3>📧 Auto-Generated Emails</h3>
+                <div id="emails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function analyzeMeeting() {
+            const notes = document.getElementById('meetingNotes').value.trim();
+            if (!notes) { alert('Please paste your meeting notes first!'); return; }
+
+            document.querySelector('.analyze-btn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+
+                const data = await response.json();
+
+                // Action Items
+                const actionDiv = document.getElementById('actionItems');
+                actionDiv.innerHTML = '';
+                document.getElementById('actionCount').textContent = data.action_items.length;
+                data.action_items.forEach(item => {
+                    actionDiv.innerHTML += `
+                        <div class="action-item">
+                            <div class="person">👤 ${item.person}</div>
+                            <div class="task">${item.task}</div>
+                            ${item.deadline ? `<div class="deadline">⏰ ${item.deadline}</div>` : ''}
+                        </div>`;
+                });
+
+                // Decisions
+                const decisionsDiv = document.getElementById('decisions');
+                decisionsDiv.innerHTML = '';
+                document.getElementById('decisionCount').textContent = data.decisions.length;
+                data.decisions.forEach(d => {
+                    decisionsDiv.innerHTML += `<div class="decision-item">✓ ${d}</div>`;
+                });
+
+                // Unresolved
+                const unresolvedDiv = document.getElementById('unresolved');
+                unresolvedDiv.innerHTML = '';
+                document.getElementById('unresolvedCount').textContent = data.unresolved.length;
+                data.unresolved.forEach(u => {
+                    unresolvedDiv.innerHTML += `<div class="unresolved-item">⚠ ${u}</div>`;
+                });
+
+                // Emails
+                const emailsDiv = document.getElementById('emails');
+                emailsDiv.innerHTML = '';
+                data.emails.forEach(email => {
+                    emailsDiv.innerHTML += `
+                        <div class="email-card">
+                            <div class="email-header">
+                                📧 Email to ${email.person}
+                                <button class="copy-btn" onclick="copyEmail(this, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Copy</button>
+                            </div>
+                            <div class="email-body">${email.email_draft}</div>
+                        </div>`;
+                });
+
+                document.getElementById('results').style.display = 'block';
+
+            } catch (error) {
+                alert('Something went wrong! Please try again.');
+                console.error(error);
+            } finally {
+                document.querySelector('.analyze-btn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function copyEmail(btn, text) {
+            navigator.clipboard.writeText(text);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+    </script>
+</body>
+</html>
