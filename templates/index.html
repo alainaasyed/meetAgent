@@ -11,9 +11,19 @@
             background: linear-gradient(135deg, #0078d4, #004e8c);
             color: white;
             padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .header h1 { font-size: 26px; margin-bottom: 4px; }
         .header p { font-size: 14px; opacity: 0.8; }
+        .header-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         .input-section {
             background: white;
@@ -44,8 +54,8 @@
             font-family: inherit;
         }
         textarea:focus { outline: none; border-color: #0078d4; }
+        .btn-row { display: flex; gap: 12px; margin-top: 12px; }
         .analyze-btn {
-            margin-top: 12px;
             background: #0078d4;
             color: white;
             border: none;
@@ -57,6 +67,19 @@
         }
         .analyze-btn:hover { background: #004e8c; }
         .analyze-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .export-btn {
+            background: #00a86b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: none;
+        }
+        .export-btn:hover { background: #007a4d; }
+        .export-btn:disabled { background: #ccc; cursor: not-allowed; }
         .loading { display: none; text-align: center; padding: 20px; color: #0078d4; font-size: 16px; }
         .results { display: none; }
         .summary-card {
@@ -68,6 +91,29 @@
         }
         .summary-card h3 { font-size: 16px; margin-bottom: 8px; opacity: 0.9; }
         .summary-card p { font-size: 15px; line-height: 1.6; }
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0078d4;
+        }
+        .stat-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
         .card {
             background: white;
             border-radius: 12px;
@@ -92,55 +138,25 @@
         .email-header { background: #f5f5f5; padding: 10px 16px; font-weight: 600; color: #333; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .email-subject { font-size: 12px; color: #666; padding: 8px 16px; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
         .email-input { padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; align-items: center; }
-        .email-input input {
-            flex: 1;
-            padding: 6px 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 13px;
-        }
+        .email-input input { flex: 1; padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 13px; }
         .email-body { padding: 16px; font-size: 14px; color: #444; white-space: pre-wrap; line-height: 1.6; }
         .btn-group { display: flex; gap: 8px; }
-        .copy-btn {
-            background: #0078d4;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .send-btn {
-            background: #00a86b;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-        }
+        .copy-btn { background: #0078d4; color: white; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .send-btn { background: #00a86b; color: white; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
         .send-btn:hover { background: #007a4d; }
         .send-btn:disabled { background: #ccc; cursor: not-allowed; }
         .badge { display: inline-block; background: #0078d4; color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #00a86b;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: #00a86b; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .footer { text-align: center; padding: 24px; color: #888; font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🤝 MeetAgent</h1>
-        <p>AI-powered meeting notes analyzer — paste notes, get instant action items & auto-send emails</p>
+        <div>
+            <h1>🤝 MeetAgent</h1>
+            <p>AI-powered meeting notes analyzer — paste notes, get instant action items & auto-send emails</p>
+        </div>
+        <div class="header-badge">⚡ Powered by Groq AI</div>
     </div>
 
     <div class="container">
@@ -155,8 +171,10 @@ Sarah needs to fix the API bug.
 We decided to use React for frontend.
 Budget approval is still pending from manager.
 Team meeting next Monday at 10am."></textarea>
-            <br>
-            <button class="analyze-btn" onclick="analyzeMeeting()">⚡ Analyze Meeting</button>
+            <div class="btn-row">
+                <button class="analyze-btn" onclick="analyzeMeeting()">⚡ Analyze Meeting</button>
+                <button class="export-btn" id="exportBtn" onclick="exportPDF()">📄 Export to PDF</button>
+            </div>
         </div>
 
         <div class="loading" id="loading">🤖 MeetAgent is analyzing your notes...</div>
@@ -165,6 +183,25 @@ Team meeting next Monday at 10am."></textarea>
             <div class="summary-card">
                 <h3>📊 Meeting Summary</h3>
                 <p id="summaryText"></p>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="number" id="statActions">0</div>
+                    <div class="label">Action Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="statDecisions">0</div>
+                    <div class="label">Decisions Made</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="statUnresolved">0</div>
+                    <div class="label">Unresolved Issues</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="statEmails">0</div>
+                    <div class="label">Emails Generated</div>
+                </div>
             </div>
 
             <div class="card">
@@ -189,9 +226,12 @@ Team meeting next Monday at 10am."></textarea>
         </div>
     </div>
 
+    <div class="footer">Built with ❤️ for Microsoft Agents League Hackathon 2026</div>
     <div class="toast" id="toast"></div>
 
     <script>
+        let meetingData = null;
+
         async function analyzeMeeting() {
             const notes = document.getElementById('meetingNotes').value.trim();
             const title = document.getElementById('meetingTitle').value.trim() || 'Team Meeting';
@@ -200,6 +240,7 @@ Team meeting next Monday at 10am."></textarea>
             document.querySelector('.analyze-btn').disabled = true;
             document.getElementById('loading').style.display = 'block';
             document.getElementById('results').style.display = 'none';
+            document.getElementById('exportBtn').style.display = 'none';
 
             try {
                 const response = await fetch('/analyze', {
@@ -209,9 +250,16 @@ Team meeting next Monday at 10am."></textarea>
                 });
 
                 const data = await response.json();
+                meetingData = data;
 
                 // Summary
                 document.getElementById('summaryText').textContent = data.summary || 'Meeting analyzed successfully.';
+
+                // Stats
+                document.getElementById('statActions').textContent = data.action_items.length;
+                document.getElementById('statDecisions').textContent = data.decisions.length;
+                document.getElementById('statUnresolved').textContent = data.unresolved.length;
+                document.getElementById('statEmails').textContent = data.emails.length;
 
                 // Action Items
                 const actionDiv = document.getElementById('actionItems');
@@ -265,6 +313,7 @@ Team meeting next Monday at 10am."></textarea>
                 });
 
                 document.getElementById('results').style.display = 'block';
+                document.getElementById('exportBtn').style.display = 'block';
 
             } catch (error) {
                 alert('Something went wrong! Please try again.');
@@ -272,6 +321,40 @@ Team meeting next Monday at 10am."></textarea>
             } finally {
                 document.querySelector('.analyze-btn').disabled = false;
                 document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function exportPDF() {
+            if (!meetingData) { alert('Please analyze a meeting first!'); return; }
+
+            const exportBtn = document.getElementById('exportBtn');
+            exportBtn.disabled = true;
+            exportBtn.textContent = '⏳ Generating PDF...';
+
+            try {
+                const response = await fetch('/export_pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: document.getElementById('meetingTitle').value || 'Meeting Report',
+                        ...meetingData
+                    })
+                });
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'MeetAgent_Report.pdf';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showToast('PDF downloaded successfully!');
+
+            } catch (error) {
+                alert('PDF generation failed!');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.textContent = '📄 Export to PDF';
             }
         }
 
