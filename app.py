@@ -91,6 +91,7 @@ def send_email():
         return jsonify({'success': True, 'message': f'Email sent to {recipient}'})
 
     except Exception as e:
+        print(f"EMAIL ERROR: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
