@@ -3,527 +3,787 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeetAgent - AI Meeting Assistant</title>
+    <title>MeetAgent — AI Meeting Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; }
-        .header {
-            background: linear-gradient(135deg, #0078d4, #004e8c);
-            color: white;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --dark-3: #334155;
+            --grey: #64748b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --white: #ffffff;
         }
-        .header h1 { font-size: 26px; margin-bottom: 4px; }
-        .header p { font-size: 14px; opacity: 0.8; }
-        .header-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 6px 14px;
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* NAV */
+        nav {
+            background: var(--dark);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-logo-icon {
+            width: 36px; height: 36px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .nav-logo-text { font-size: 18px; font-weight: 700; }
+        .nav-badge {
+            background: rgba(99,102,241,0.2);
+            color: #a5b4fc;
+            border: 1px solid rgba(99,102,241,0.3);
+            padding: 5px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
         }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .input-section {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+
+        /* HERO */
+        .hero {
+            background: var(--dark);
+            padding: 80px 40px 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+            top: -200px; left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .hero-eyebrow {
+            display: inline-block;
+            background: rgba(99,102,241,0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99,102,241,0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
             margin-bottom: 24px;
         }
-        .input-section h2 { color: #0078d4; margin-bottom: 12px; font-size: 18px; }
-        .meeting-title {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 12px;
-            font-family: inherit;
-        }
-        .meeting-title:focus { outline: none; border-color: #0078d4; }
-        textarea {
-            width: 100%;
-            height: 180px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 14px;
-            resize: vertical;
-            font-family: inherit;
-        }
-        textarea:focus { outline: none; border-color: #0078d4; }
-        .btn-row { display: flex; gap: 12px; margin-top: 12px; }
-        .analyze-btn {
-            background: #0078d4;
+        .hero-title {
+            font-size: 56px;
+            font-weight: 900;
             color: white;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .analyze-btn:hover { background: #004e8c; }
-        .analyze-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .export-btn {
-            background: #00a86b;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-            display: none;
-        }
-        .export-btn:hover { background: #007a4d; }
-        .export-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .loading { display: none; text-align: center; padding: 20px; color: #0078d4; font-size: 16px; }
-        .results { display: none; }
-        .summary-card {
-            background: linear-gradient(135deg, #0078d4, #004e8c);
-            color: white;
-            border-radius: 12px;
-            padding: 20px 24px;
+            line-height: 1.1;
             margin-bottom: 20px;
+            letter-spacing: -0.02em;
         }
-        .summary-card h3 { font-size: 16px; margin-bottom: 8px; opacity: 0.9; }
-        .summary-card p { font-size: 15px; line-height: 1.6; }
-        .stats-row {
+        .hero-title span { color: var(--primary); }
+        .hero-subtitle {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        /* INPUT SECTION */
+        .input-section {
+            max-width: 800px;
+            margin: -50px auto 0;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
+        }
+        .input-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+        }
+        .input-group { margin-bottom: 20px; }
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.01em;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--dark);
+            background: var(--light);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        }
+        textarea.input-field {
+            height: 150px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-primary {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(99,102,241,0.3); }
+        .btn-primary:disabled { background: #c8c6c4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline-primary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: none; align-items: center; gap: 8px;
+        }
+        .btn-outline-primary:hover { background: var(--primary-light); }
+        .btn-outline-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* LOADING */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px 24px;
+        }
+        .loading-dots {
             display: flex;
-            gap: 16px;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .loading-dots span {
+            width: 10px; height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .loading p { color: var(--grey); font-size: 15px; font-weight: 500; }
+
+        /* RESULTS */
+        .results { display: none; max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+
+        /* SUMMARY */
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .summary-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 8px; }
+        .summary-text { font-size: 16px; line-height: 1.7; font-weight: 400; }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
             margin-bottom: 20px;
         }
         .stat-card {
-            flex: 1;
             background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            padding: 20px 16px;
             text-align: center;
+            border: 1.5px solid var(--border);
+            transition: all 0.2s;
         }
-        .stat-card .number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #0078d4;
-        }
-        .stat-card .label {
-            font-size: 13px;
-            color: #666;
-            margin-top: 4px;
-        }
-        .card {
+        .stat-card:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(99,102,241,0.1); }
+        .stat-number { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .stat-label { font-size: 12px; color: var(--grey); margin-top: 6px; font-weight: 500; }
+
+        /* SECTION CARDS */
+        .section-card {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 24px 28px;
+            border: 1.5px solid var(--border);
+            margin-bottom: 16px;
+            transition: box-shadow 0.2s;
+        }
+        .section-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
         }
-        .card h3 { color: #0078d4; margin-bottom: 16px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-        .action-item {
-            background: #f0f7ff;
-            border-left: 4px solid #0078d4;
-            padding: 12px;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 10px;
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex; align-items: center; gap: 8px;
         }
-        .action-item .person { font-weight: 600; color: #0078d4; font-size: 14px; }
-        .action-item .task { color: #333; font-size: 14px; margin-top: 4px; }
-        .action-item .deadline { color: #888; font-size: 12px; margin-top: 4px; }
-        .decision-item { background: #f0fff4; border-left: 4px solid #00a86b; padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14px; color: #333; }
-        .unresolved-item { background: #fff8f0; border-left: 4px solid #ff8c00; padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14px; color: #333; }
-        .email-card { border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
-        .email-header { background: #f5f5f5; padding: 10px 16px; font-weight: 600; color: #333; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .email-subject { font-size: 12px; color: #666; padding: 8px 16px; border-bottom: 1px solid #e0e0e0; background: #fafafa; }
-        .email-input { padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #e0e0e0; display: flex; gap: 8px; align-items: center; }
-        .email-input input { flex: 1; padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 13px; }
-        .email-body { padding: 16px; font-size: 14px; color: #444; white-space: pre-wrap; line-height: 1.6; }
-        .btn-group { display: flex; gap: 8px; }
-        .copy-btn { background: #0078d4; color: white; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-        .send-btn { background: #00a86b; color: white; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-        .send-btn:hover { background: #007a4d; }
-        .send-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .badge { display: inline-block; background: #0078d4; color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
-        .toast { position: fixed; bottom: 24px; right: 24px; background: #00a86b; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .footer { text-align: center; padding: 24px; color: #888; font-size: 13px; }
-        .timeline { position: relative; padding: 10px 0; }
-.timeline-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    background: white;
-    border: 1px solid #e0e0e0;
-}
-.timeline-dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.timeline-dot.green { background: #00a86b; }
-.timeline-dot.yellow { background: #ffa500; }
-.timeline-dot.red { background: #ff4444; }
-.timeline-dot.grey { background: #999; }
-.timeline-info { flex: 1; }
-.timeline-person { font-weight: 600; color: #333; font-size: 14px; }
-.timeline-task { color: #666; font-size: 13px; margin-top: 2px; }
-.timeline-deadline {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 20px;
-}
-.deadline-green { background: #f0fff4; color: #00a86b; }
-.deadline-yellow { background: #fff8e0; color: #cc8800; }
-.deadline-red { background: #fff0f0; color: #ff4444; }
-.deadline-grey { background: #f5f5f5; color: #999; }
+        .section-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ACTION ITEMS */
+        .action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            margin-bottom: 10px;
+            background: var(--light);
+            transition: all 0.2s;
+        }
+        .action-item:hover { border-color: var(--primary); background: white; }
+        .action-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .action-content { flex: 1; }
+        .action-person { font-size: 14px; font-weight: 600; color: var(--dark); }
+        .action-task { font-size: 13px; color: var(--grey); margin-top: 3px; line-height: 1.5; }
+        .action-deadline {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 600;
+            margin-top: 8px; padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--primary-light); color: var(--primary);
+        }
+
+        /* LIST ITEMS */
+        .list-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 10px;
+            margin-bottom: 8px; font-size: 14px; line-height: 1.5;
+        }
+        .list-item.decision { background: var(--success-light); color: var(--dark); }
+        .list-item.unresolved { background: var(--warning-light); color: var(--dark); }
+        .list-icon { flex-shrink: 0; font-size: 15px; }
+
+        /* DEADLINE TRACKER */
+        .deadline-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: 12px;
+            border: 1.5px solid var(--border);
+            margin-bottom: 8px; background: var(--light);
+            transition: all 0.2s;
+        }
+        .deadline-item:hover { background: white; }
+        .deadline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .deadline-dot.green { background: var(--success); }
+        .deadline-dot.yellow { background: var(--warning); }
+        .deadline-dot.red { background: var(--danger); }
+        .deadline-dot.grey { background: #cbd5e1; }
+        .deadline-info { flex: 1; }
+        .deadline-person { font-size: 13px; font-weight: 600; color: var(--dark); }
+        .deadline-task { font-size: 12px; color: var(--grey); margin-top: 2px; }
+        .deadline-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+        }
+        .deadline-badge.green { background: var(--success-light); color: var(--success); }
+        .deadline-badge.yellow { background: var(--warning-light); color: #92400e; }
+        .deadline-badge.red { background: var(--danger-light); color: var(--danger); }
+        .deadline-badge.grey { background: #f1f5f9; color: var(--grey); }
+
+        /* EMAIL CARDS */
+        .email-card {
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .email-card:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(99,102,241,0.1); }
+        .email-header-bar {
+            background: var(--light);
+            padding: 12px 18px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1.5px solid var(--border);
+        }
+        .email-to { font-size: 14px; font-weight: 600; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+        .email-subject-bar { padding: 8px 18px; font-size: 12px; color: var(--grey); border-bottom: 1px solid var(--border); background: white; }
+        .email-recipient-row {
+            padding: 10px 18px; background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .email-recipient-row label { font-size: 12px; font-weight: 600; color: var(--grey); white-space: nowrap; }
+        .email-recipient-row input {
+            flex: 1; padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px; font-size: 13px; font-family: inherit;
+            transition: border 0.2s;
+        }
+        .email-recipient-row input:focus { outline: none; border-color: var(--primary); }
+        .email-body-text { padding: 16px 18px; font-size: 13px; color: var(--dark); white-space: pre-wrap; line-height: 1.7; background: white; }
+        .email-btns { display: flex; gap: 6px; }
+        .btn-copy {
+            background: white; color: var(--grey);
+            border: 1.5px solid var(--border);
+            padding: 5px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-copy:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-send {
+            background: var(--success); color: white;
+            border: none; padding: 5px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-send:hover { background: #059669; }
+        .btn-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 28px; right: 28px;
+            background: var(--dark);
+            color: white; padding: 14px 22px;
+            border-radius: 12px; font-size: 13px; font-weight: 500;
+            display: none; align-items: center; gap: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center; padding: 40px 24px;
+            color: #94a3b8; font-size: 13px;
+        }
+
+        @media (max-width: 640px) {
+            .hero-title { font-size: 36px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .hero { padding: 60px 24px 80px; }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div>
-            <h1>🤝 MeetAgent</h1>
-            <p>AI-powered meeting notes analyzer — paste notes, get instant action items & auto-send emails</p>
-        </div>
-        <div class="header-badge">⚡ Powered by Groq AI</div>
-    </div>
 
-    <div class="container">
-        <div class="input-section">
-            <h2>📋 Paste Your Meeting Notes</h2>
-            <input type="text" class="meeting-title" id="meetingTitle" placeholder="Meeting Title (e.g. Weekly Sprint Planning)">
-            <textarea id="meetingNotes" placeholder="Paste your rough meeting notes here...
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-icon">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="1" y="8" width="2" height="4" rx="1" fill="white"/>
+        <rect x="5" y="5" width="2" height="10" rx="1" fill="white"/>
+        <rect x="9" y="2" width="2" height="16" rx="1" fill="white"/>
+        <rect x="13" y="5" width="2" height="10" rx="1" fill="white"/>
+        <rect x="17" y="8" width="2" height="4" rx="1" fill="white"/>
+    </svg>
+</div>
+        <div class="nav-logo-text">MeetAgent</div>
+    </div>
+    <div class="nav-badge">⚡ Microsoft Agents League 2026</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-eyebrow">▌▍▎ AI-Powered Meeting Intelligence</div>
+    <h1 class="hero-title">Your meetings,<br><span>actually followed up.</span></h1>
+    <p class="hero-subtitle">Paste rough meeting notes and MeetAgent instantly extracts action items, decisions, and sends personalized emails to your entire team.</p>
+</div>
+
+<!-- INPUT -->
+<div class="input-section">
+    <div class="input-card">
+        <div class="input-group">
+            <label class="input-label">Meeting Title</label>
+            <input type="text" class="input-field" id="meetingTitle" placeholder="e.g. Weekly Sprint Planning — June 10, 2026">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Paste Your Meeting Notes</label>
+            <textarea class="input-field" id="meetingNotes" placeholder="Paste your rough meeting notes here...
 
 Example:
 John will finish the login page by Friday.
-Sarah needs to fix the API bug.
-We decided to use React for frontend.
+Sarah needs to fix the API bug by Wednesday.
+We decided to use React for the frontend.
 Budget approval is still pending from manager.
-Team meeting next Monday at 10am."></textarea>
-            <div class="btn-row">
-                <button class="analyze-btn" onclick="analyzeMeeting()">⚡ Analyze Meeting</button>
-                <button class="export-btn" id="exportBtn" onclick="exportPDF()">📄 Export to PDF</button>
-            </div>
+Next meeting Tuesday at 10am."></textarea>
         </div>
-
-        <div class="loading" id="loading">🤖 MeetAgent is analyzing your notes...</div>
-
-        <div class="results" id="results">
-            <div class="summary-card">
-                <h3>📊 Meeting Summary</h3>
-                <p id="summaryText"></p>
-            </div>
-
-            <div class="stats-row">
-                <div class="stat-card">
-                    <div class="number" id="statActions">0</div>
-                    <div class="label">Action Items</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statDecisions">0</div>
-                    <div class="label">Decisions Made</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statUnresolved">0</div>
-                    <div class="label">Unresolved Issues</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number" id="statEmails">0</div>
-                    <div class="label">Emails Generated</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>✅ Action Items <span class="badge" id="actionCount">0</span></h3>
-                <div id="actionItems"></div>
-            </div>
-
-            <div class="card">
-                <h3>🎯 Decisions Made <span class="badge" id="decisionCount">0</span></h3>
-                <div id="decisions"></div>
-            </div>
-
-            <div class="card">
-                <h3>⚠️ Unresolved Issues <span class="badge" id="unresolvedCount">0</span></h3>
-                <div id="unresolved"></div>
-            </div>
-
-            <div class="card">
-                <h3>📧 Auto-Generated Emails</h3>
-                <div id="emails"></div>
-            </div>
+        <div class="btn-row">
+            <button class="btn-primary" onclick="analyzeMeeting()" id="analyzeBtn">
+                ⚡ Analyze Meeting
+            </button>
+            <button class="btn-outline-primary" onclick="exportPDF()" id="exportBtn">
+                📄 Export PDF
+            </button>
         </div>
     </div>
-    <div class="card" id="deadlineCard" style="display:none;">
-    <h3>📅 Deadline Tracker</h3>
-    <div id="deadlineTracker"></div>
+</div>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+    <div class="loading-dots">
+        <span></span><span></span><span></span>
     </div>
-    <div class="footer">Built with ❤️ for Microsoft Agents League Hackathon 2026</div>
-    <div class="toast" id="toast"></div>
+    <p>MeetAgent is analyzing your notes...</p>
+</div>
 
-    <script>
-        let meetingData = null;
+<!-- RESULTS -->
+<div class="results" id="results">
 
-        async function analyzeMeeting() {
-            const notes = document.getElementById('meetingNotes').value.trim();
-            const title = document.getElementById('meetingTitle').value.trim() || 'Team Meeting';
-            if (!notes) { alert('Please paste your meeting notes first!'); return; }
+    <div class="summary-card">
+        <div class="summary-eyebrow">📊 Meeting Summary</div>
+        <div class="summary-text" id="summaryText"></div>
+    </div>
 
-            document.querySelector('.analyze-btn').disabled = true;
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('exportBtn').style.display = 'none';
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="statActions">0</div>
+            <div class="stat-label">Action Items</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statDecisions">0</div>
+            <div class="stat-label">Decisions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statUnresolved">0</div>
+            <div class="stat-label">Unresolved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statEmails">0</div>
+            <div class="stat-label">Emails</div>
+        </div>
+    </div>
 
-            try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ notes, title })
-                });
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">✅ Action Items <span class="section-badge" id="actionCount">0</span></div>
+        </div>
+        <div id="actionItems"></div>
+    </div>
 
-                const data = await response.json();
-                meetingData = data;
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">🎯 Decisions Made <span class="section-badge" id="decisionCount">0</span></div>
+        </div>
+        <div id="decisions"></div>
+    </div>
 
-                document.getElementById('summaryText').textContent = data.summary || 'Meeting analyzed successfully.';
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">⚠️ Unresolved Issues <span class="section-badge" id="unresolvedCount">0</span></div>
+        </div>
+        <div id="unresolved"></div>
+    </div>
 
-                document.getElementById('statActions').textContent = data.action_items.length;
-                document.getElementById('statDecisions').textContent = data.decisions.length;
-                document.getElementById('statUnresolved').textContent = data.unresolved.length;
-                document.getElementById('statEmails').textContent = data.emails.length;
+    <div class="section-card" id="deadlineCard" style="display:none;">
+        <div class="section-header">
+            <div class="section-title">📅 Deadline Tracker</div>
+        </div>
+        <div id="deadlineTracker"></div>
+    </div>
 
-                const actionDiv = document.getElementById('actionItems');
-                actionDiv.innerHTML = '';
-                document.getElementById('actionCount').textContent = data.action_items.length;
-                data.action_items.forEach(item => {
-                    actionDiv.innerHTML += `
-                        <div class="action-item">
-                            <div class="person">👤 ${item.person}</div>
-                            <div class="task">${item.task}</div>
-                            ${item.deadline ? `<div class="deadline">⏰ ${item.deadline}</div>` : ''}
-                        </div>`;
-                });
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">📧 Auto-Generated Emails</div>
+        </div>
+        <div id="emails"></div>
+    </div>
 
-                const decisionsDiv = document.getElementById('decisions');
-                decisionsDiv.innerHTML = '';
-                document.getElementById('decisionCount').textContent = data.decisions.length;
-                data.decisions.forEach(d => {
-                    decisionsDiv.innerHTML += `<div class="decision-item">✓ ${d}</div>`;
-                });
+</div>
 
-                const unresolvedDiv = document.getElementById('unresolved');
-                unresolvedDiv.innerHTML = '';
-                document.getElementById('unresolvedCount').textContent = data.unresolved.length;
-                data.unresolved.forEach(u => {
-                    unresolvedDiv.innerHTML += `<div class="unresolved-item">⚠ ${u}</div>`;
-                });
+<div class="footer">
+    Built with ❤️ for Microsoft Agents League Hackathon 2026 &nbsp;·&nbsp; MeetAgent by Aliana Begum
+</div>
 
-                const emailsDiv = document.getElementById('emails');
-                emailsDiv.innerHTML = '';
-                data.emails.forEach((email, index) => {
-                    emailsDiv.innerHTML += `
-                        <div class="email-card">
-                            <div class="email-header">
-                                📧 Email to ${email.person}
-                                <div class="btn-group">
-                                    <button class="copy-btn" onclick="copyEmail(this, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Copy</button>
-                                    <button class="send-btn" id="sendBtn${index}" onclick="sendEmail(${index}, '${email.subject}', \`${email.email_draft.replace(/`/g, '\\`')}\`)">Send Email</button>
-                                </div>
-                            </div>
-                            <div class="email-subject">Subject: ${email.subject}</div>
-                            <div class="email-input">
-                                <span style="font-size:13px;color:#666">To:</span>
-                                <input type="email" id="emailTo${index}" placeholder="Enter recipient email address" />
-                            </div>
-                            <div class="email-body">${email.email_draft}</div>
-                        </div>`;
-                });
+<div class="toast" id="toast"></div>
 
-                buildDeadlineTracker(data.action_items);
-                document.getElementById('results').style.display = 'block';
-                document.getElementById('exportBtn').style.display = 'block';
+<script>
+    let meetingData = null;
 
-            } catch (error) {
-                alert('Something went wrong! Please try again.');
-                console.error(error);
-            } finally {
-                document.querySelector('.analyze-btn').disabled = false;
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
+    async function analyzeMeeting() {
+        const notes = document.getElementById('meetingNotes').value.trim();
+        const title = document.getElementById('meetingTitle').value.trim() || 'Team Meeting';
+        if (!notes) { alert('Please paste your meeting notes first!'); return; }
 
-        async function exportPDF() {
-            if (!meetingData) { alert('Please analyze a meeting first!'); return; }
+        document.getElementById('analyzeBtn').disabled = true;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('exportBtn').style.display = 'none';
 
-            const exportBtn = document.getElementById('exportBtn');
-            exportBtn.disabled = true;
-            exportBtn.textContent = '⏳ Generating PDF...';
+        try {
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes, title })
+            });
 
-            try {
-                const response = await fetch('/export_pdf', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: document.getElementById('meetingTitle').value || 'Meeting Report',
-                        ...meetingData
-                    })
-                });
+            const data = await response.json();
+            meetingData = data;
 
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'MeetAgent_Report.pdf';
-                a.click();
-                window.URL.revokeObjectURL(url);
-                showToast('PDF downloaded successfully!');
+            document.getElementById('summaryText').textContent = data.summary || 'Meeting analyzed successfully.';
+            document.getElementById('statActions').textContent = data.action_items.length;
+            document.getElementById('statDecisions').textContent = data.decisions.length;
+            document.getElementById('statUnresolved').textContent = data.unresolved.length;
+            document.getElementById('statEmails').textContent = data.emails.length;
 
-            } catch (error) {
-                alert('PDF generation failed!');
-            } finally {
-                exportBtn.disabled = false;
-                exportBtn.textContent = '📄 Export to PDF';
-            }
-        }
-
-        async function sendEmail(index, subject, body) {
-            const emailInput = document.getElementById(`emailTo${index}`);
-            const recipient = emailInput.value.trim();
-
-            if (!recipient) {
-                alert('Please enter recipient email address!');
-                return;
-            }
-
-            const sendBtn = document.getElementById(`sendBtn${index}`);
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Sending...';
-
-            try {
-                const response = await fetch('/send_email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: recipient, subject, body })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    sendBtn.textContent = '✓ Sent!';
-                    sendBtn.style.background = '#00a86b';
-                    showToast(`Email sent to ${recipient}!`);
-                } else {
-                    alert('Failed to send: ' + data.error);
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Send Email';
-                }
-            } catch (error) {
-                alert('Something went wrong!');
-                sendBtn.disabled = false;
-                sendBtn.textContent = 'Send Email';
-            }
-        }
-
-        function copyEmail(btn, text) {
-            navigator.clipboard.writeText(text);
-            btn.textContent = 'Copied!';
-            setTimeout(() => btn.textContent = 'Copy', 2000);
-        }
-
-        function buildDeadlineTracker(actionItems) {
-            const trackerDiv = document.getElementById('deadlineTracker');
-            const card = document.getElementById('deadlineCard');
-            trackerDiv.innerHTML = '';
-
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            const days = {
-                'monday':1,'tuesday':2,'wednesday':3,'thursday':4,
-                'friday':5,'saturday':6,'sunday':0
-            };
-
-            function parseDeadline(deadlineStr) {
-                if (!deadlineStr) return null;
-                const str = deadlineStr.toLowerCase().trim();
-
-                for (const [day, dayNum] of Object.entries(days)) {
-                    if (str.includes(day)) {
-                        const date = new Date(today);
-                        const currentDay = date.getDay();
-                        let diff = dayNum - currentDay;
-                        if (diff <= 0) diff += 7;
-                        date.setDate(date.getDate() + diff);
-                        return date;
-                    }
-                }
-
-                const parsed = new Date(deadlineStr);
-                if (!isNaN(parsed)) return parsed;
-                return null;
-            }
-
-            let hasDeadlines = false;
-
-            actionItems.forEach(item => {
-                if (!item.deadline) return;
-                hasDeadlines = true;
-
-                const deadlineDate = parseDeadline(item.deadline);
-                let colorClass = 'grey';
-                let deadlineClass = 'deadline-grey';
-                let deadlineLabel = item.deadline;
-
-                if (deadlineDate) {
-                    const diffDays = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-
-                    if (diffDays < 0) {
-                        colorClass = 'red';
-                        deadlineClass = 'deadline-red';
-                        deadlineLabel = `⚠ Overdue (${item.deadline})`;
-                    } else if (diffDays === 0) {
-                        colorClass = 'red';
-                        deadlineClass = 'deadline-red';
-                        deadlineLabel = `🔴 Due Today!`;
-                    } else if (diffDays <= 3) {
-                        colorClass = 'yellow';
-                        deadlineClass = 'deadline-yellow';
-                        deadlineLabel = `🟡 ${diffDays} day${diffDays > 1 ? 's' : ''} left (${item.deadline})`;
-                    } else {
-                        colorClass = 'green';
-                        deadlineClass = 'deadline-green';
-                        deadlineLabel = `🟢 ${diffDays} days left (${item.deadline})`;
-                    }
-                }
-
-                trackerDiv.innerHTML += `
-                    <div class="timeline-item">
-                        <div class="timeline-dot ${colorClass}"></div>
-                        <div class="timeline-info">
-                            <div class="timeline-person">👤 ${item.person}</div>
-                            <div class="timeline-task">${item.task}</div>
+            // Action Items
+            const actionDiv = document.getElementById('actionItems');
+            actionDiv.innerHTML = '';
+            document.getElementById('actionCount').textContent = data.action_items.length;
+            data.action_items.forEach(item => {
+                const initials = item.person.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+                actionDiv.innerHTML += `
+                    <div class="action-item">
+                        <div class="action-avatar">${initials}</div>
+                        <div class="action-content">
+                            <div class="action-person">${item.person}</div>
+                            <div class="action-task">${item.task}</div>
+                            ${item.deadline ? `<div class="action-deadline">⏰ ${item.deadline}</div>` : ''}
                         </div>
-                        <div class="timeline-deadline ${deadlineClass}">${deadlineLabel}</div>
                     </div>`;
             });
 
-            if (!hasDeadlines) {
-                trackerDiv.innerHTML = '<p style="color:#888;font-size:14px;">No deadlines found in meeting notes.</p>';
+            // Decisions
+            const decisionsDiv = document.getElementById('decisions');
+            decisionsDiv.innerHTML = '';
+            document.getElementById('decisionCount').textContent = data.decisions.length;
+            data.decisions.forEach(d => {
+                decisionsDiv.innerHTML += `<div class="list-item decision"><span class="list-icon">✓</span>${d}</div>`;
+            });
+
+            // Unresolved
+            const unresolvedDiv = document.getElementById('unresolved');
+            unresolvedDiv.innerHTML = '';
+            document.getElementById('unresolvedCount').textContent = data.unresolved.length;
+            data.unresolved.forEach(u => {
+                unresolvedDiv.innerHTML += `<div class="list-item unresolved"><span class="list-icon">⚠</span>${u}</div>`;
+            });
+
+            // Emails
+            const emailsDiv = document.getElementById('emails');
+            emailsDiv.innerHTML = '';
+            data.emails.forEach((email, index) => {
+                emailsDiv.innerHTML += `
+                    <div class="email-card">
+                        <div class="email-header-bar">
+                            <div class="email-to">📧 ${email.person}</div>
+                            <div class="email-btns">
+                                <button class="btn-copy" onclick="copyEmail(this, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Copy</button>
+                                <button class="btn-send" id="sendBtn${index}" onclick="sendEmail(${index}, \`${email.subject.replace(/`/g, '\\`')}\`, \`${email.email_draft.replace(/`/g, '\\`')}\`)">Send Email</button>
+                            </div>
+                        </div>
+                        <div class="email-subject-bar">Subject: ${email.subject}</div>
+                        <div class="email-recipient-row">
+                            <label>To:</label>
+                            <input type="email" id="emailTo${index}" placeholder="Enter recipient email address">
+                        </div>
+                        <div class="email-body-text">${email.email_draft}</div>
+                    </div>`;
+            });
+
+            buildDeadlineTracker(data.action_items);
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('exportBtn').style.display = 'flex';
+
+        } catch (error) {
+            alert('Something went wrong! Please try again.');
+            console.error(error);
+        } finally {
+            document.getElementById('analyzeBtn').disabled = false;
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    async function exportPDF() {
+        if (!meetingData) { alert('Please analyze a meeting first!'); return; }
+        const exportBtn = document.getElementById('exportBtn');
+        exportBtn.disabled = true;
+        exportBtn.textContent = '⏳ Generating...';
+        try {
+            const response = await fetch('/export_pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: document.getElementById('meetingTitle').value || 'Meeting Report',
+                    ...meetingData
+                })
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'MeetAgent_Report.pdf';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showToast('✅ PDF downloaded!');
+        } catch (error) {
+            alert('PDF generation failed!');
+        } finally {
+            exportBtn.disabled = false;
+            exportBtn.textContent = '📄 Export PDF';
+        }
+    }
+
+    async function sendEmail(index, subject, body) {
+        const recipient = document.getElementById(`emailTo${index}`).value.trim();
+        if (!recipient) { alert('Please enter recipient email address!'); return; }
+        const sendBtn = document.getElementById(`sendBtn${index}`);
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending...';
+        try {
+            const response = await fetch('/send_email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: recipient, subject, body })
+            });
+            const data = await response.json();
+            if (data.success) {
+                sendBtn.textContent = '✓ Sent!';
+                sendBtn.style.background = '#059669';
+                showToast(`✅ Email sent to ${recipient}!`);
+            } else {
+                alert('Failed: ' + data.error);
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Email';
             }
+        } catch (error) {
+            alert('Something went wrong!');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send Email';
+        }
+    }
 
-            card.style.display = 'block';
+    function copyEmail(btn, text) {
+        navigator.clipboard.writeText(text);
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+    }
+
+    function buildDeadlineTracker(actionItems) {
+        const trackerDiv = document.getElementById('deadlineTracker');
+        const card = document.getElementById('deadlineCard');
+        trackerDiv.innerHTML = '';
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const days = { 'monday':1,'tuesday':2,'wednesday':3,'thursday':4,'friday':5,'saturday':6,'sunday':0 };
+
+        function parseDeadline(str) {
+            if (!str) return null;
+            const s = str.toLowerCase();
+            for (const [day, num] of Object.entries(days)) {
+                if (s.includes(day)) {
+                    const d = new Date(today);
+                    let diff = num - d.getDay();
+                    if (diff <= 0) diff += 7;
+                    d.setDate(d.getDate() + diff);
+                    return d;
+                }
+            }
+            const p = new Date(str);
+            return isNaN(p) ? null : p;
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 3000);
+        let hasDeadlines = false;
+        actionItems.forEach(item => {
+            if (!item.deadline) return;
+            hasDeadlines = true;
+            const date = parseDeadline(item.deadline);
+            let color = 'grey', label = item.deadline;
+            if (date) {
+                const diff = Math.ceil((date - today) / 86400000);
+                if (diff < 0) { color = 'red'; label = `Overdue — ${item.deadline}`; }
+                else if (diff === 0) { color = 'red'; label = 'Due Today!'; }
+                else if (diff <= 3) { color = 'yellow'; label = `${diff}d left — ${item.deadline}`; }
+                else { color = 'green'; label = `${diff}d left — ${item.deadline}`; }
+            }
+            trackerDiv.innerHTML += `
+                <div class="deadline-item">
+                    <div class="deadline-dot ${color}"></div>
+                    <div class="deadline-info">
+                        <div class="deadline-person">${item.person}</div>
+                        <div class="deadline-task">${item.task}</div>
+                    </div>
+                    <div class="deadline-badge ${color}">${label}</div>
+                </div>`;
+        });
+
+        if (!hasDeadlines) {
+            trackerDiv.innerHTML = '<p style="color:#94a3b8;font-size:13px;">No deadlines detected in meeting notes.</p>';
         }
-    </script>
+        card.style.display = 'block';
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'flex';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+</script>
 </body>
 </html>
