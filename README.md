@@ -151,7 +151,7 @@ meetAgent/
 ---
 
 ## 🎥 Demo
-
+ 🌐 Live Demo: https://meetagent.onrender.com
 > 📹 Demo video coming soon!
 
 **Sample Input:**
