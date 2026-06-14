@@ -151,8 +151,8 @@ meetAgent/
 ---
 
 ## 🎥 Demo
- 🌐 Live Demo: https://meetagent.onrender.com
-> 📹 Demo video coming soon!
+
+📹 Demo Video: [Watch on YouTube](https://youtu.be/n9VYtQ8vyEw?si=-PLvdq2e9D810BUW)
 
 **Sample Input:**
 John will complete the login page by Friday.
